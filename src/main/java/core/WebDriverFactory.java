@@ -2,6 +2,7 @@ package core;
 
 import enums.BrowserEnum;
 import enums.EnvironmentEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -11,6 +12,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+@Slf4j
 public final class WebDriverFactory {
     //from browserstack
     // https://automate.browserstack.com/dashboard/v2/getting-started
@@ -30,6 +32,11 @@ public final class WebDriverFactory {
     public static WebDriver getDriver(BrowserEnum browser,
                                       String browserVersion,
                                       EnvironmentEnum environment){
+        log.info(
+                String.format("Initializing WebDriver for browser %s, vesrion %s on environment %s",
+                        browser.name(), browserVersion, environment.name())
+        );
+
         setProperties(); //обовязково
         if (environment.equals(EnvironmentEnum.LOCAL)){
             return getLocalDriver(browser);
@@ -37,6 +44,8 @@ public final class WebDriverFactory {
             setCaps(browser, browserVersion);
             return getRemoteDriver();
         }else{
+            //when try catch exception
+            log.error("Unsupported environment: " + environment);//just example
             throw new RuntimeException("Unsupported environment: " + environment); //RuntimeException шоб не try кечати
         }
     }
@@ -59,43 +68,11 @@ public final class WebDriverFactory {
         try {
             url = new URL(URL);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+             log.error(e.getMessage());//tak robyty
+            e.printStackTrace(); //tak ne duzhe dobre robyty
         }
         return new RemoteWebDriver(url, caps); //шоб посилати драйвер на хаб
     }
-
-
-//    private static void setPropertiesOksana() {
-//        String driversFolderWin = "src\\test\\resources\\drivers\\";
-//        String driversFolderUnix = "src/test/resources/drivers/";
-//        //визначити на якій операційній системі ми є
-//        String os = System.getProperty("os.name"); //поверне назву операційної системи windows, macOs
-//        String arch = System.getProperty("os.arch"); // x86, x64 поверне архітектуру
-//
-//        if (os.toLowerCase().contains("win")) {
-//            if (arch.contains("64")) {
-//                System.setProperty("webdriver.chrome.driver", driversFolderWin + "win\\64\\chromedriver.exe");
-//                System.setProperty("webdriver.gecko.driver", driversFolderWin + "win\\64\\geckodriver.exe");
-//            } else {
-//                System.setProperty("webdriver.chrome.driver", driversFolderWin + "win\\86\\chromedriver.exe");
-//                System.setProperty("webdriver.gecko.driver", driversFolderWin + "win\\86\\geckodriver.exe");
-//            }
-//        } else if (os.toLowerCase().contains("nux") || os.toLowerCase().contains("nix")) {
-//            if (arch.contains("64")) {
-//                System.setProperty("webdriver.chrome.driver", driversFolderUnix + "linux/64/chromedriver.exe");
-//                System.setProperty("webdriver.gecko.driver", driversFolderUnix + "linux/64/geckodriver.exe");
-//            } else {
-//                System.setProperty("webdriver.chrome.driver", driversFolderUnix + "linux/86/chromedriver.exe");
-//                System.setProperty("webdriver.gecko.driver", driversFolderUnix + "linux/86/geckodriver.exe");
-//            }
-//        } else if (os.toLowerCase().contains("mac")) {
-//                            System.setProperty("webdriver.chrome.driver", driversFolderUnix + "linux/64/chromedriver.exe");
-//                System.setProperty("webdriver.gecko.driver", driversFolderUnix + "linux/64/geckodriver.exe");
-//        }else{
-//            throw new RuntimeException("Unsupported OS: " + os);
-//        }
-//
-//    }
 
     private static void setProperties() {
         String driversFolderWin = "src\\test\\resources\\drivers\\";

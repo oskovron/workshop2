@@ -3,6 +3,7 @@ package tests;
 import core.WebDriverFactory;
 import enums.BrowserEnum;
 import enums.EnvironmentEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.PageFactory;
 import org.testng.annotations.AfterClass;
@@ -12,7 +13,9 @@ import pageobjects.LoginPage;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class BaseTest {
+    public static final String URL = "https://www.phptravels.net/admin/";
 
     protected WebDriver driver;
     protected LoginPage loginPage;
@@ -21,7 +24,8 @@ public class BaseTest {
     public void setup(BrowserEnum browser, String browserVersion, EnvironmentEnum environment) {
         driver = WebDriverFactory.getDriver(browser, browserVersion, environment);
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        driver.get("https://www.phptravels.net/admin/");
+        driver.get(URL);
+
         loginPage = PageFactory.initElements(driver, LoginPage.class);
     }
 
